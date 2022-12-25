@@ -1,0 +1,28 @@
+on:
+  workflow_dispatch
+
+name: Build Flask Application
+
+jobs:
+  build_container:
+    name: Build Application
+    runs-on: ubuntu-latest
+    environment: sandbox
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure Azure Credentials
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{secrets.REGISTRY_NAME}}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - name: Build Image
+      env:
+        ACR_REGISTRY: ${{secrets.REGISTRY_NAME}}
+        ACR_REPOSITORY: 1bvssandbox
+        IMAGE_TAG: santa
+      run: |
+        docker build -t $ACR_REGISTRY/$ACR_REPOSITORY:$IMAGE_TAG .
+        docker push $ACR_REGISTRY/$ACR_REPOSITORY:$IMAGE_TAG
